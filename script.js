@@ -1,287 +1,37 @@
-// Sistema de Cadastro Profissional
-// Gerenciamento de estado e funcionalidades
+class SistemaCadastro{constructor(){this.currentUser=null;this.clients=[];this.products=[];this.users=[];this.init()}
+ init(){this.loadFromStorage();this.setupEventListeners();this.setupMasks();this.checkAuth()}
 
-class SistemaCadastro {
-    constructor() {
-        this.currentUser = null;
-        this.clients = [];
-        this.products = [];
-        this.users = [];
-        this.init();
-    }
+ loadFromStorage(){const storedUsers=localStorage.getItem('sistema_usuarios');const storedClients=localStorage.getItem('sistema_clientes');const storedProducts=localStorage.getItem('sistema_produtos');const storedCurrentUser=localStorage.getItem('sistema_usuario_atual');if(storedUsers)this.users=JSON.parse(storedUsers);if(storedClients)this.clients=JSON.parse(storedClients);if(storedProducts)this.products=JSON.parse(storedProducts);if(storedCurrentUser)this.currentUser=JSON.parse(storedCurrentUser);if(this.users.length===0){this.createDefaultAdmin()}}
 
-    init() {
-        this.loadFromStorage();
-        this.setupEventListeners();
-        this.setupMasks();
-        this.checkAuth();
-    }
+ saveToStorage(){localStorage.setItem('sistema_usuarios',JSON.stringify(this.users));localStorage.setItem('sistema_clientes',JSON.stringify(this.clients));localStorage.setItem('sistema_produtos',JSON.stringify(this.products));if(this.currentUser){localStorage.setItem('sistema_usuario_atual',JSON.stringify(this.currentUser))}}
 
-    // Gerenciamento de Armazenamento Local
-    loadFromStorage() {
-        const storedUsers = localStorage.getItem('sistema_usuarios');
-        const storedClients = localStorage.getItem('sistema_clientes');
-        const storedProducts = localStorage.getItem('sistema_produtos');
-        const storedCurrentUser = localStorage.getItem('sistema_usuario_atual');
+ createDefaultAdmin(){const adminUser={id:this.generateId(),name:'Administrador',email:'admin@sistema.com',password:this.hashPassword('admin123'),createdAt:new Date().toISOString()};this.users.push(adminUser);this.saveToStorage()}
 
-        if (storedUsers) this.users = JSON.parse(storedUsers);
-        if (storedClients) this.clients = JSON.parse(storedClients);
-        if (storedProducts) this.products = JSON.parse(storedProducts);
-        if (storedCurrentUser) this.currentUser = JSON.parse(storedCurrentUser);
+ showScreen(screenId){const screens=document.querySelectorAll('.screen');screens.forEach(screen=>{screen.classList.remove('active')});const targetScreen=document.getElementById(screenId);if(targetScreen){targetScreen.classList.add('active')}if(screenId==='mainScreen'&&this.currentUser){document.getElementById('userName').textContent=this.currentUser.name}}
 
-        // Criar usuário admin padrão se não existir usuários
-        if (this.users.length === 0) {
-            this.createDefaultAdmin();
-        }
-    }
+ checkAuth(){if(this.currentUser){this.showScreen('mainScreen')}else{this.showScreen('loginScreen')}}
 
-    saveToStorage() {
-        localStorage.setItem('sistema_usuarios', JSON.stringify(this.users));
-        localStorage.setItem('sistema_clientes', JSON.stringify(this.clients));
-        localStorage.setItem('sistema_produtos', JSON.stringify(this.products));
-        if (this.currentUser) {
-            localStorage.setItem('sistema_usuario_atual', JSON.stringify(this.currentUser));
-        }
-    }
+ async login(email,password){try{const user=this.users.find(u=>u.email===email);if(!user){throw new Error('Usuário não encontrado')}if(!this.verifyPassword(password,user.password)){throw new Error('Senha incorreta')}this.currentUser={id:user.id,name:user.name,email:user.email};this.saveToStorage();this.showScreen('mainScreen');this.showMessage('Sucesso','Login realizado com sucesso!','success');return true}catch(error){this.showMessage('Erro de Login',error.message,'error');return false}}
 
-    createDefaultAdmin() {
-        const adminUser = {
-            id: this.generateId(),
-            name: 'Administrador',
-            email: 'admin@sistema.com',
-            password: this.hashPassword('admin123'),
-            createdAt: new Date().toISOString()
-        };
-        this.users.push(adminUser);
-        this.saveToStorage();
-    }
+ async register(name,email,password){try{if(this.users.some(u=>u.email===email)){throw new Error('Este e-mail já está cadastrado')}if(password.length<6){throw new Error('A senha deve ter pelo menos 6 caracteres')}const newUser={id:this.generateId(),name:name.trim(),email:email.trim().toLowerCase(),password:this.hashPassword(password),createdAt:new Date().toISOString()};this.users.push(newUser);this.saveToStorage();this.showMessage('Sucesso','Conta criada com sucesso! Faça login para continuar.','success');this.showScreen('loginScreen');return true}catch(error){this.showMessage('Erro no Cadastro',error.message,'error');return false}}
 
-    // Navegação entre Telas
-    showScreen(screenId) {
-        const screens = document.querySelectorAll('.screen');
-        screens.forEach(screen => {
-            screen.classList.remove('active');
-        });
+ logout(){this.currentUser=null;localStorage.removeItem('sistema_usuario_atual');this.showScreen('loginScreen');this.showMessage('Logout','Você saiu do sistema com sucesso.','info')}
 
-        const targetScreen = document.getElementById(screenId);
-        if (targetScreen) {
-            targetScreen.classList.add('active');
-        }
+ async registerClient(clientData){try{const cpfLimpo=this.cleanCpf(clientData.cpf);if(this.clients.some(c=>this.cleanCpf(c.cpf)===cpfLimpo)){throw new Error('Já existe um cliente cadastrado com este CPF')}const newClient={id:this.generateId(),...clientData,cpf:clientData.cpf,createdAt:new Date().toISOString()};this.clients.push(newClient);this.saveToStorage();document.getElementById('clientRegisteredInfo').textContent=`O cliente ${newClient.name} (CPF: ${newClient.cpf}) foi cadastrado com sucesso!`;this.showScreen('clientRegisteredScreen');return true}catch(error){this.showMessage('Erro no Cadastro',error.message,'error');return false}}
 
-        // Atualizar informações do usuário se estiver na tela principal
-        if (screenId === 'mainScreen' && this.currentUser) {
-            document.getElementById('userName').textContent = this.currentUser.name;
-        }
-    }
+ searchClient(cpf){const cpfLimpo=this.cleanCpf(cpf);const client=this.clients.find(c=>this.cleanCpf(c.cpf)===cpfLimpo);if(client){this.showMessage('Cliente Encontrado',`Nome: ${client.name}\nCPF: ${client.cpf}\nE-mail: ${client.email}\nTelefone: ${client.phone||'Não informado'}`,'info');return client}else{this.showMessage('Cliente Não Encontrado','Não foi encontrado nenhum cliente com este CPF.','warning');return null}}
 
-    // Autenticação
-    checkAuth() {
-        if (this.currentUser) {
-            this.showScreen('mainScreen');
-        } else {
-            this.showScreen('loginScreen');
-        }
-    }
+ async registerProduct(productData){try{if(this.products.some(p=>p.ip===productData.ip)){throw new Error('Já existe um produto cadastrado com este IP')}if(!this.validateIP(productData.ip)){throw new Error('Formato de IP inválido')}const newProduct={id:this.generateId(),...productData,price:this.formatPriceToNumber(productData.price),createdAt:new Date().toISOString()};this.products.push(newProduct);this.saveToStorage();document.getElementById('productRegisteredInfo').textContent=`O produto ${newProduct.name} (IP: ${newProduct.ip}) foi cadastrado com sucesso!`;this.showScreen('productRegisteredScreen');return true}catch(error){this.showMessage('Erro no Cadastro',error.message,'error');return false}}
 
-    async login(email, password) {
-        try {
-            const user = this.users.find(u => u.email === email);
-            
-            if (!user) {
-                throw new Error('Usuário não encontrado');
-            }
+ searchProduct(ip){const product=this.products.find(p=>p.ip===ip);if(product){this.showMessage('Produto Encontrado',`Nome: ${product.name}\nIP: ${product.ip}\nCategoria: ${product.category}\nPreço: R$ ${product.price.toFixed(2)}\nQuantidade: ${product.quantity}`,'info');return product}else{this.showMessage('Produto Não Encontrado','Não foi encontrado nenhum produto com este IP.','warning');return null}}
 
-            if (!this.verifyPassword(password, user.password)) {
-                throw new Error('Senha incorreta');
-            }
-
-            this.currentUser = {
-                id: user.id,
-                name: user.name,
-                email: user.email
-            };
-
-            this.saveToStorage();
-            this.showScreen('mainScreen');
-            this.showMessage('Sucesso', 'Login realizado com sucesso!', 'success');
-            
-            return true;
-        } catch (error) {
-            this.showMessage('Erro de Login', error.message, 'error');
-            return false;
-        }
-    }
-
-    async register(name, email, password) {
-        try {
-            // Verificar se email já existe
-            if (this.users.some(u => u.email === email)) {
-                throw new Error('Este e-mail já está cadastrado');
-            }
-
-            // Validar senha
-            if (password.length < 6) {
-                throw new Error('A senha deve ter pelo menos 6 caracteres');
-            }
-
-            const newUser = {
-                id: this.generateId(),
-                name: name.trim(),
-                email: email.trim().toLowerCase(),
-                password: this.hashPassword(password),
-                createdAt: new Date().toISOString()
-            };
-
-            this.users.push(newUser);
-            this.saveToStorage();
-
-            this.showMessage('Sucesso', 'Conta criada com sucesso! Faça login para continuar.', 'success');
-            this.showScreen('loginScreen');
-            
-            return true;
-        } catch (error) {
-            this.showMessage('Erro no Cadastro', error.message, 'error');
-            return false;
-        }
-    }
-
-    logout() {
-        this.currentUser = null;
-        localStorage.removeItem('sistema_usuario_atual');
-        this.showScreen('loginScreen');
-        this.showMessage('Logout', 'Você saiu do sistema com sucesso.', 'info');
-    }
-
-    // Gerenciamento de Clientes
-    async registerClient(clientData) {
-        try {
-            // Verificar se CPF já existe
-            const cpfLimpo = this.cleanCpf(clientData.cpf);
-            if (this.clients.some(c => this.cleanCpf(c.cpf) === cpfLimpo)) {
-                throw new Error('Já existe um cliente cadastrado com este CPF');
-            }
-
-            const newClient = {
-                id: this.generateId(),
-                ...clientData,
-                cpf: clientData.cpf,
-                createdAt: new Date().toISOString()
-            };
-
-            this.clients.push(newClient);
-            this.saveToStorage();
-
-            // Mostrar tela de sucesso
-            document.getElementById('clientRegisteredInfo').textContent = 
-                `O cliente ${newClient.name} (CPF: ${newClient.cpf}) foi cadastrado com sucesso!`;
-            this.showScreen('clientRegisteredScreen');
-            
-            return true;
-        } catch (error) {
-            this.showMessage('Erro no Cadastro', error.message, 'error');
-            return false;
-        }
-    }
-
-    searchClient(cpf) {
-        const cpfLimpo = this.cleanCpf(cpf);
-        const client = this.clients.find(c => this.cleanCpf(c.cpf) === cpfLimpo);
-        
-        if (client) {
-            this.showMessage('Cliente Encontrado', 
-                `Nome: ${client.name}\nCPF: ${client.cpf}\nE-mail: ${client.email}\nTelefone: ${client.phone || 'Não informado'}`, 
-                'info');
-            return client;
-        } else {
-            this.showMessage('Cliente Não Encontrado', 'Não foi encontrado nenhum cliente com este CPF.', 'warning');
-            return null;
-        }
-    }
-
-    // Gerenciamento de Produtos
-    async registerProduct(productData) {
-        try {
-            // Verificar se IP já existe
-            if (this.products.some(p => p.ip === productData.ip)) {
-                throw new Error('Já existe um produto cadastrado com este IP');
-            }
-
-            // Validar formato do IP
-            if (!this.validateIP(productData.ip)) {
-                throw new Error('Formato de IP inválido');
-            }
-
-            const newProduct = {
-                id: this.generateId(),
-                ...productData,
-                price: this.formatPriceToNumber(productData.price),
-                createdAt: new Date().toISOString()
-            };
-
-            this.products.push(newProduct);
-            this.saveToStorage();
-
-            // Mostrar tela de sucesso
-            document.getElementById('productRegisteredInfo').textContent = 
-                `O produto ${newProduct.name} (IP: ${newProduct.ip}) foi cadastrado com sucesso!`;
-            this.showScreen('productRegisteredScreen');
-            
-            return true;
-        } catch (error) {
-            this.showMessage('Erro no Cadastro', error.message, 'error');
-            return false;
-        }
-    }
-
-    searchProduct(ip) {
-        const product = this.products.find(p => p.ip === ip);
-        
-        if (product) {
-            this.showMessage('Produto Encontrado', 
-                `Nome: ${product.name}\nIP: ${product.ip}\nCategoria: ${product.category}\nPreço: R$ ${product.price.toFixed(2)}\nQuantidade: ${product.quantity}`, 
-                'info');
-            return product;
-        } else {
-            this.showMessage('Produto Não Encontrado', 'Não foi encontrado nenhum produto com este IP.', 'warning');
-            return null;
-        }
-    }
-
-    // Utilitários
-    generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-
-    hashPassword(password) {
-        // Simples hash para demonstração (em produção usar bcrypt ou similar)
-        return btoa(password + 'sistema_salt');
-    }
-
-    verifyPassword(password, hash) {
-        return this.hashPassword(password) === hash;
-    }
-
-    cleanCpf(cpf) {
-        return cpf.replace(/\D/g, '');
-    }
-
-    validateIP(ip) {
-        const ipPattern = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-        return ipPattern.test(ip);
-    }
-
-    formatPriceToNumber(price) {
-        // Remove R$, pontos e vírgulas, converte para número
-        const cleanPrice = price.replace(/[R$\s.]/g, '').replace(',', '.');
-        return parseFloat(cleanPrice) || 0;
-    }
-
-    formatPriceToDisplay(price) {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(price);
-    }
+ generateId(){return Date.now().toString(36)+Math.random().toString(36).substr(2)}
+ hashPassword(password){return btoa(password+'sistema_salt')}
+ verifyPassword(password,hash){return this.hashPassword(password)===hash}
+ cleanCpf(cpf){return cpf.replace(/\D/g,'')}
+ validateIP(ip){const ipPattern=/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;return ipPattern.test(ip)}
+ formatPriceToNumber(price){const cleanPrice=price.replace(/[R$\s.]/g,'').replace(',','.');return parseFloat(cleanPrice)||0}
+ formatPriceToDisplay(price){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(price)}
 
     // Máscaras de Formatação
     setupMasks() {
