@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cadastro Profissional</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Tela de Login -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-container">
+                <div class="login-header">
+                    <div class="logo">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h1>Bem-vindo</h1>
+                    <p>Entre com suas credenciais para acessar o sistema</p>
+                </div>
+                
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="loginEmail">E-mail</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="loginEmail" placeholder="seu@email.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">Senha</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="loginPassword" placeholder="••••••••" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('loginPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="rememberMe">
+                            <span class="checkmark"></span>
+                            Lembrar-me
+                        </label>
+                        <a href="#" class="forgot-password">Esqueci minha senha</a>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Entrar
+                    </button>
+                </form>
+                
+                <div class="login-footer">
+                    <p>Não tem uma conta? <a href="#" onclick="showScreen('registerScreen')">Cadastre-se</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Cadastro de Usuário -->
+        <div id="registerScreen" class="screen">
+            <div class="login-container">
+                <div class="login-header">
+                    <div class="logo">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h1>Criar Conta</h1>
+                    <p>Preencha os dados para criar sua conta</p>
+                </div>
+                
+                <form id="registerForm" class="login-form">
+                    <div class="form-group">
+                        <label for="registerName">Nome Completo</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="registerName" placeholder="Seu nome completo" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerEmail">E-mail</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="registerEmail" placeholder="seu@email.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerPassword">Senha</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="registerPassword" placeholder="Crie uma senha forte" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('registerPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirmar Senha</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="confirmPassword" placeholder="Confirme sua senha" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="agreeTerms" required>
+                            <span class="checkmark"></span>
+                            Concordo com os termos de uso
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Criar Conta
+                    </button>
+                </form>
+                
+                <div class="login-footer">
+                    <p>Já tem uma conta? <a href="#" onclick="showScreen('loginScreen')">Faça login</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela Principal (Menu) -->
+        <div id="mainScreen" class="screen">
+            <div class="main-container">
+                <header class="main-header">
+                    <div class="header-content">
+                        <div class="logo">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Sistema Profissional</span>
+                        </div>
+                        <div class="user-info">
+                            <span id="userName">Usuário</span>
+                            <button class="btn-logout" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Sair
+                            </button>
+                        </div>
+                    </div>
+                </header>
+                
+                <main class="main-content">
+                    <div class="welcome-section">
+                        <h2>Painel de Controle</h2>
+                        <p>Escolha uma opção abaixo para gerenciar o sistema</p>
+                    </div>
+                    
+                    <div class="menu-grid">
+                        <div class="menu-card" onclick="showScreen('clientScreen')">
+                            <div class="card-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3>Clientes</h3>
+                            <p>Cadastrar e gerenciar clientes do sistema</p>
+                            <div class="card-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="menu-card" onclick="showScreen('productScreen')">
+                            <div class="card-icon">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <h3>Produtos</h3>
+                            <p>Cadastrar e gerenciar produtos do sistema</p>
+                            <div class="card-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Tela de Clientes -->
+        <div id="clientScreen" class="screen">
+            <div class="form-container">
+                <header class="form-header">
+                    <button class="btn-back" onclick="showScreen('mainScreen')">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar
+                    </button>
+                    <h2>Cadastro de Clientes</h2>
+                </header>
+                
+                <div class="form-content">
+                    <div class="search-section">
+                        <h3>Buscar Cliente</h3>
+                        <div class="search-form">
+                            <div class="form-group">
+                                <label for="clientCpf">CPF do Cliente</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-id-card"></i>
+                                    <input type="text" id="clientCpf" placeholder="000.000.000-00" maxlength="14">
+                                </div>
+                            </div>
+                            <button class="btn-secondary" onclick="searchClient()">
+                                <i class="fas fa-search"></i>
+                                Buscar Cliente
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="divider">
+                        <span>OU</span>
+                    </div>
+                    
+                    <div class="register-section">
+                        <h3>Novo Cliente</h3>
+                        <form id="clientForm" class="data-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clientName">Nome Completo</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-user"></i>
+                                        <input type="text" id="clientName" placeholder="Nome do cliente" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clientCpfNew">CPF</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-id-card"></i>
+                                        <input type="text" id="clientCpfNew" placeholder="000.000.000-00" maxlength="14" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="clientEmail">E-mail</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-envelope"></i>
+                                        <input type="email" id="clientEmail" placeholder="cliente@email.com" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="clientPhone">Telefone</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-phone"></i>
+                                        <input type="tel" id="clientPhone" placeholder="(00) 00000-0000" maxlength="15">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="clientAddress">Endereço</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <input type="text" id="clientAddress" placeholder="Rua, número, bairro, cidade">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i>
+                                Cadastrar Cliente
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Produtos -->
+        <div id="productScreen" class="screen">
+            <div class="form-container">
+                <header class="form-header">
+                    <button class="btn-back" onclick="showScreen('mainScreen')">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar
+                    </button>
+                    <h2>Cadastro de Produtos</h2>
+                </header>
+                
+                <div class="form-content">
+                    <div class="search-section">
+                        <h3>Buscar Produto</h3>
+                        <div class="search-form">
+                            <div class="form-group">
+                                <label for="productIp">IP do Produto</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-network-wired"></i>
+                                    <input type="text" id="productIp" placeholder="192.168.1.1" pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$">
+                                </div>
+                            </div>
+                            <button class="btn-secondary" onclick="searchProduct()">
+                                <i class="fas fa-search"></i>
+                                Buscar Produto
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="divider">
+                        <span>OU</span>
+                    </div>
+                    
+                    <div class="register-section">
+                        <h3>Novo Produto</h3>
+                        <form id="productForm" class="data-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="productName">Nome do Produto</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-tag"></i>
+                                        <input type="text" id="productName" placeholder="Nome do produto" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="productIpNew">IP</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-network-wired"></i>
+                                        <input type="text" id="productIpNew" placeholder="192.168.1.1" pattern="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="productCategory">Categoria</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-list"></i>
+                                        <select id="productCategory" required>
+                                            <option value="">Selecione uma categoria</option>
+                                            <option value="eletronico">Eletrônico</option>
+                                            <option value="software">Software</option>
+                                            <option value="hardware">Hardware</option>
+                                            <option value="servico">Serviço</option>
+                                            <option value="outro">Outro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="productPrice">Preço</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <input type="text" id="productPrice" placeholder="R$ 0,00" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="productDescription">Descrição</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-align-left"></i>
+                                    <textarea id="productDescription" placeholder="Descrição detalhada do produto" rows="3"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="productQuantity">Quantidade em Estoque</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-boxes"></i>
+                                        <input type="number" id="productQuantity" placeholder="0" min="0" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="productStatus">Status</label>
+                                    <div class="input-wrapper">
+                                        <i class="fas fa-toggle-on"></i>
+                                        <select id="productStatus" required>
+                                            <option value="ativo">Ativo</option>
+                                            <option value="inativo">Inativo</option>
+                                            <option value="manutencao">Em Manutenção</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-save"></i>
+                                Cadastrar Produto
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Cliente Cadastrado -->
+        <div id="clientRegisteredScreen" class="screen">
+            <div class="success-container">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Cliente Cadastrado com Sucesso!</h2>
+                <p id="clientRegisteredInfo">O cliente foi cadastrado no sistema.</p>
+                
+                <div class="success-actions">
+                    <button class="btn-primary" onclick="showScreen('clientScreen')">
+                        <i class="fas fa-plus"></i>
+                        Cadastrar Novo Cliente
+                    </button>
+                    <button class="btn-secondary" onclick="showScreen('mainScreen')">
+                        <i class="fas fa-home"></i>
+                        Voltar ao Menu
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Produto Cadastrado -->
+        <div id="productRegisteredScreen" class="screen">
+            <div class="success-container">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Produto Cadastrado com Sucesso!</h2>
+                <p id="productRegisteredInfo">O produto foi cadastrado no sistema.</p>
+                
+                <div class="success-actions">
+                    <button class="btn-primary" onclick="showScreen('productScreen')">
+                        <i class="fas fa-plus"></i>
+                        Cadastrar Novo Produto
+                    </button>
+                    <button class="btn-secondary" onclick="showScreen('mainScreen')">
+                        <i class="fas fa-home"></i>
+                        Voltar ao Menu
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Mensagens -->
+        <div id="messageModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Mensagem</h3>
+                    <button class="modal-close" onclick="closeModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="closeModal()">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
